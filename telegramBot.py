@@ -14,16 +14,18 @@ class ObserverBot:
             media_group = []
             longText = False
             
-            for i, link in enumerate(post['photos']):
-                if i == 0:
-                    if (len(post['text']) <= 1024):
-                        media = types.InputMediaPhoto(link, caption = post['text'])
+            if (post['photos'] != []):
+                for i, link in enumerate(post['photos']):
+                    if i == 0:
+                        if (len(post['text']) <= 1024):
+                            media = types.InputMediaPhoto(link, caption = post['text'])
+                        else:
+                            longText = True
+                            media = types.InputMediaPhoto(link)
                     else:
-                        longText = True
                         media = types.InputMediaPhoto(link)
-                else:
-                    media = types.InputMediaPhoto(link)
-                media_group.append(media)
-            
-            self.bot.send_media_group(chat_id = self.channelName, media = media_group)
-            if (longText): self.bot.send_message(chat_id = self.channelName, text = post['text'])
+                    media_group.append(media)
+                self.bot.send_media_group(chat_id = self.channelName, media = media_group)
+                if (longText): self.bot.send_message(chat_id = self.channelName, text = post['text'])
+            else:
+                self.bot.send_message(chat_id = self.channelName, text = post['text'])
