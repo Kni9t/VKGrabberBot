@@ -14,8 +14,8 @@ class ObserverBot:
             media_group = []
             longText = False
             
-            if (post['photos'] != []):
-                for i, link in enumerate(post['photos']):
+            if (post['mediaLinks'] != []):
+                for i, link in enumerate(post['mediaLinks']):
                     if i == 0:
                         if (len(post['text']) <= 1024):
                             media = types.InputMediaPhoto(link, caption = post['text'])

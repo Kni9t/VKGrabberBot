@@ -13,8 +13,8 @@ class VKGrabber:
         # [
         #     {
         #         'text': 'Some text for first post',
-        #         'photos':
-        #             ['url1', 'url2' ...]
+        #         'photos': ['url1', 'url2' ...],
+        #         'videos': ['url1', 'url2' ...],
         #     },
         #     ...
         # ] 
@@ -23,15 +23,21 @@ class VKGrabber:
         wall = vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = count)
         
         for post in wall['items']:
-            bufPostDate = {}
-            bufAttachmentsList = []
+            bufPostDate = {
+                'text': None,
+                'mediaLinks': None,
+            }
+            bufMediaList = []
             
             bufPostDate['text'] = post['text']
             
-            for pict in post['attachments']:
-                if (pict['type'] == 'photo'):
-                    bufAttachmentsList.append(pict['photo']['orig_photo']['url'])
-            bufPostDate['photos'] = bufAttachmentsList
+            for attach in post['attachments']:
+                if (attach['type'] == 'photo'):
+                    bufMediaList.append(attach['photo']['orig_photo']['url'])
+                if (attach['type'] == 'video'):
+                    bufMediaList.append(f'https://vk.com/video{attach['video']['owner_id']}_{attach['video']['id']}?access_key={attach['video']['access_key']}')
+           
+            bufPostDate['mediaLinks'] = bufMediaList
             
             postList.append(bufPostDate)
             
