@@ -10,7 +10,7 @@ with open('parameters.json') as file:
 VKCollector = VKGrabber(parametersDict['VKToken'])
 telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['channelUsername'])
 
-postList = VKCollector.GetPostFromWall(parametersDict['VKGroupID'], 3)
+postList = VKCollector.GetPostFromWall(parametersDict['VKGroupID'], 10)
 telegramBot.SendPost(postList)
 
 time.sleep(1)
