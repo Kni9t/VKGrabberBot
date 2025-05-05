@@ -1,11 +1,15 @@
 import telebot
 import json
 from telebot import types
+import sys
 
 from VKGrabber import VKGrabber
 
-VKCollector = VKGrabber("Parameters/token")
-bot = telebot.TeleBot(open('Parameters/botKey').read())
-channelParams = json.load('channel_parameters.json')
+with open('parameters.json') as file:
+    parametersDict = json.load(file)
 
-bot.send_message(chat_id = channelParams['channel_username'], text = 'Hello world!')
+VKCollector = VKGrabber(parametersDict['VKToken'])
+bot = telebot.TeleBot(parametersDict['botKey'])
+
+bot.send_message(chat_id = parametersDict['channelUsername'], text = 'Hello world!')
+# bot.send_photo(chat_id=channel_id, photo=photo, caption='Вот фото!')

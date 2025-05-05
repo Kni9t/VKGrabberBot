@@ -3,8 +3,8 @@ import json
 import vk
 
 class VKGrabber:
-    def __init__(self, tokenFileName):
-        gettingToken = open(tokenFileName, 'r').read().split('&')
+    def __init__(self, token):
+        gettingToken = token.split('&')
         self.token = gettingToken[0]
         self.token_v = gettingToken[1][2:]
         
