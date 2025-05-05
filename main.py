@@ -4,6 +4,5 @@ from telebot import types
 
 from VKGrabber import VKGrabber
 
-VKCollector = VKGrabber("token")
-
-bot = telebot.TeleBot(open('botKey').read())
+VKCollector = VKGrabber("Parameters/token")
+bot = telebot.TeleBot(open('Parameters/botKey').read())
