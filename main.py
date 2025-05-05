@@ -1,15 +1,16 @@
-import telebot
 import json
-from telebot import types
-import sys
+import time
 
 from VKGrabber import VKGrabber
+from telegramBot import ObserverBot
 
 with open('parameters.json') as file:
     parametersDict = json.load(file)
 
 VKCollector = VKGrabber(parametersDict['VKToken'])
-bot = telebot.TeleBot(parametersDict['botKey'])
+telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['channelUsername'])
 
-bot.send_message(chat_id = parametersDict['channelUsername'], text = 'Hello world!')
-# bot.send_photo(chat_id=channel_id, photo=photo, caption='Вот фото!')
+postList = VKCollector.GetPostFromWall(parametersDict['VKGroupID'], 3)
+telegramBot.SendPost(postList)
+
+time.sleep(1)
