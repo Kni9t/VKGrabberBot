@@ -13,6 +13,30 @@ class ObserverBot:
     def generateContentHash(self, caption, url = ''):
         data = (caption or '') + str(url)
         return hashlib.md5(data.encode()).hexdigest()
+    
+    def resizeText(self, text):
+        resultTextList = []
+        
+        if (len(text) > 4096):
+            bufStr = ''
+            for paragraph in text.split('\n'):
+                if (len(bufStr) + len(paragraph) > 4095):
+                    resultTextList.append(bufStr)
+                    bufStr = paragraph
+                else:
+                    bufStr += ('\n' + paragraph)
+                    
+            resultTextList.append(bufStr)
+        else:
+            resultTextList = [text]
+        
+        return resultTextList
+    
+    def SendStr(self, str):
+        bufStr = self.resizeText(str)
+        
+        for message in bufStr:
+            self.bot.send_message(chat_id = self.channelName, text = message)
         
     def SendPost(self, posts):
         if (type(posts) is list):
@@ -62,9 +86,9 @@ class ObserverBot:
                         self.bot.send_media_group(chat_id = self.channelName, media = media_group)
                     else:
                         self.bot.send_media_group(chat_id = self.channelName, media = media_group)
-                        self.bot.send_message(chat_id = self.channelName, text = post['text'])
+                        if (post['text'] != ''): self.SendStr(post['text'])
                 else:
-                    if (post['text'] != ''): self.bot.send_message(chat_id = self.channelName, text = post['text'])
+                    if (post['text'] != ''): self.SendStr(post['text'])
                     
                 if (len(gif_group) > 0):
                     bif_buf_group = []
