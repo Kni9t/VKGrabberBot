@@ -37,7 +37,7 @@ class ObserverBot:
                     self.bot.send_media_group(chat_id = self.channelName, media = media_group)
                     self.bot.send_message(chat_id = self.channelName, text = post['text'])
             else:
-                self.bot.send_message(chat_id = self.channelName, text = post['text'])
+                if (post['text'] != ''): self.bot.send_message(chat_id = self.channelName, text = post['text'])
                 
             if (len(music_group) > 0):
                 for music in music_group:

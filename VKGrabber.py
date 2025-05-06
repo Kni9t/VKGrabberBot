@@ -40,6 +40,9 @@ class VKGrabber:
             
             bufPostDate['text'] = post['text']
             
+            if('copy_history' in post.keys()):
+                break
+            
             for attach in post['attachments']:
                 if (attach['type'] == 'photo'):
                     bufMediaList.append({
@@ -48,10 +51,14 @@ class VKGrabber:
                         })
                     
                 if (attach['type'] == 'video'):
-                    bufMediaList.append({
-                        'type': 'video',
-                        'content': f'https://vk.com/video{attach['video']['owner_id']}_{attach['video']['id']}?access_key={attach['video']['access_key']}'
-                        })
+                    if(attach['video']['type'] == 'video'):
+                        bufMediaList.append({
+                            'type': 'video',
+                            'content': f'https://vk.com/video{attach['video']['owner_id']}_{attach['video']['id']}?access_key={attach['video']['access_key']}'
+                            })
+                        
+                    if(attach['video']['type'] == 'short_video'):
+                        break
                     
                 if (attach['type'] == 'audio'):
                     bufMediaList.append({
