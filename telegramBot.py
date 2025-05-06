@@ -79,11 +79,8 @@ class ObserverBot:
                 gif_group = []
                 
                 if (self.generateContentHash(post['text'], post['mediaLinks']) in sent_posts):
-                    # print(f'Пост ({post['text'][:40]}) уже опубликован!')
+                    print(f'Пост ({post['text'][:40]}) уже опубликован!')
                     continue
-                
-                print('Публикация')
-                print(self.generateContentHash(post['text'], post['mediaLinks']))
                 
                 for mediaLink in post['mediaLinks']:
                     if ((mediaLink['type'] == 'photo') or (mediaLink['type'] == 'video')):
