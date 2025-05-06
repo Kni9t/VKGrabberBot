@@ -6,9 +6,11 @@ import hashlib
 import json
 
 class ObserverBot:
-    def __init__(self, botkey, channelName):
+    def __init__(self, botkey, channelName, hashFileName = 'sent_posts.json'):
         self.bot = telebot.TeleBot(botkey)
         self.channelName = channelName
+        self.hashFileName = hashFileName
+        self.backupHashFileName = 'backupHash.json'
         
     def generateContentHash(self, caption, url = ''):
         data = (caption or '') + str(url)
@@ -37,17 +39,36 @@ class ObserverBot:
         
         for message in bufStr:
             self.bot.send_message(chat_id = self.channelName, text = message)
+            
+    def SaveHash(self, hash):
+        try:
+            with open(self.hashFileName, 'w', encoding='utf-8') as file:
+                json.dump(hash, file)
+                file.close()
+        except Exception as e:
+            print(f'Ошибка сохранения данных в файл: {self.hashFileName}!\n{e}\nПопытка сохранить данные в резервный файл {self.backupHashFileName}...')
+            try:
+                with open(self.backupHashFileName, 'w', encoding='utf-8') as file:
+                    json.dump(hash, file)
+                    file.close()
+            except Exception as ex:
+                print(f'Ошибка сохранения данных в резервный файл {self.backupHashFileName}! Данные для Hash файла потеряны!\n{ex}')
+    
+    def LoadHash(self):
+        result = []
+        try:
+            with open(self.hashFileName, 'r') as file:
+                result = list(json.load(file))
+                file.close()
+        except Exception as e:
+            print(f'Ошибка загрузки данных из файла: {self.hashFileName}!\n{e}\nБудет создан новый файл hash!')
+        return result
         
     def SendPost(self, posts):
         if (type(posts) is list):
             posts = reversed(posts)
             
-        try:
-            with open('sent_posts.json', 'r') as f:
-                sent_posts = list(json.load(f))
-                f.close()
-        except:
-            sent_posts = []
+        sent_posts = self.LoadHash()
         
         try:
             for post in posts:
@@ -58,9 +79,12 @@ class ObserverBot:
                 gif_group = []
                 
                 if (self.generateContentHash(post['text'], post['mediaLinks']) in sent_posts):
-                    print(f'Пост ({post['text'][:40]}) уже опубликован!')
+                    # print(f'Пост ({post['text'][:40]}) уже опубликован!')
                     continue
-                    
+                
+                print('Публикация')
+                print(self.generateContentHash(post['text'], post['mediaLinks']))
+                
                 for mediaLink in post['mediaLinks']:
                     if ((mediaLink['type'] == 'photo') or (mediaLink['type'] == 'video')):
                         media_group.append(types.InputMediaPhoto(mediaLink['content']))
@@ -119,12 +143,8 @@ class ObserverBot:
                 sent_posts.append(self.generateContentHash(post['text'], post['mediaLinks']))
                 time.sleep(6)
                 
-            with open('sent_posts.json', 'w', encoding='utf-8') as f:
-                json.dump(sent_posts, f)
-                f.close()
+            self.SaveHash(sent_posts)
                 
         except Exception as e:
             print(f'Ошибка: {e}')
-            with open('sent_posts.json', 'w', encoding='utf-8') as f:
-                json.dump(sent_posts, f)
-                f.close()
+            self.SaveHash(sent_posts)
