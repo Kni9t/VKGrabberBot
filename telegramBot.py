@@ -14,17 +14,19 @@ class ObserverBot:
         for post in posts:
             media_group = []
             music_group = []
+            doc_group = []
                 
             for mediaLink in post['mediaLinks']:
                 if ((mediaLink['type'] == 'photo') or (mediaLink['type'] == 'video')):
                     media_group.append(types.InputMediaPhoto(mediaLink['content']))
+                
+                if (mediaLink['type'] == 'gif'):
+                    media_group.append(types.InputMediaDocument(media = mediaLink['content']))
+                
+                if (mediaLink['type'] == 'doc'):
+                    doc_group.append(mediaLink)
                     
                 if (mediaLink['type'] == 'audio'):
-                    # self.bot.send_audio(chat_id = self.channelName, audio = mediaLink['content'], title = "test name", performer = 'test artist')
-                    # self.bot.send_audio(chat_id = self.channelName,
-                    #                     audio = requests.get(mediaLink['content']).content,
-                    #                     title = mediaLink['title'],
-                    #                     performer = mediaLink['artist'])
                     music_group.append(mediaLink)
                     
             if (len(media_group) > 0):
@@ -43,3 +45,7 @@ class ObserverBot:
                                         audio = requests.get(music['content']).content,
                                         title = music['title'],
                                         performer = music['artist'])
+                    
+            if (len(doc_group) > 0):
+                for doc in doc_group:
+                    self.bot.send_document(chat_id = self.channelName, document = doc['content'])

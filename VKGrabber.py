@@ -46,11 +46,13 @@ class VKGrabber:
                         'type': 'photo', 
                         'content': attach['photo']['orig_photo']['url']
                         })
+                    
                 if (attach['type'] == 'video'):
                     bufMediaList.append({
                         'type': 'video',
                         'content': f'https://vk.com/video{attach['video']['owner_id']}_{attach['video']['id']}?access_key={attach['video']['access_key']}'
                         })
+                    
                 if (attach['type'] == 'audio'):
                     bufMediaList.append({
                         'type': 'audio', 
@@ -58,6 +60,18 @@ class VKGrabber:
                         'title': attach['audio']['title'],
                         'artist': attach['audio']['artist']
                         })
+                    
+                if (attach['type'] == 'doc'):
+                    if (attach['doc']['ext'] == 'gif'):
+                        bufMediaList.append({
+                            'type': 'gif', 
+                            'content': attach['doc']['url']
+                            })
+                    else:
+                        bufMediaList.append({
+                            'type': 'doc', 
+                            'content': attach['doc']['url']
+                            })
            
             bufPostDate['mediaLinks'] = bufMediaList
             
