@@ -1,5 +1,6 @@
 import telebot
 from telebot import types
+import requests
 
 class ObserverBot:
     def __init__(self, botkey, channelName):
@@ -12,20 +13,33 @@ class ObserverBot:
         
         for post in posts:
             media_group = []
-            longText = False
-            
-            if (post['mediaLinks'] != []):
-                for i, link in enumerate(post['mediaLinks']):
-                    if i == 0:
-                        if (len(post['text']) <= 1024):
-                            media = types.InputMediaPhoto(link, caption = post['text'])
-                        else:
-                            longText = True
-                            media = types.InputMediaPhoto(link)
-                    else:
-                        media = types.InputMediaPhoto(link)
-                    media_group.append(media)
-                self.bot.send_media_group(chat_id = self.channelName, media = media_group)
-                if (longText): self.bot.send_message(chat_id = self.channelName, text = post['text'])
+            music_group = []
+                
+            for mediaLink in post['mediaLinks']:
+                if ((mediaLink['type'] == 'photo') or (mediaLink['type'] == 'video')):
+                    media_group.append(types.InputMediaPhoto(mediaLink['content']))
+                    
+                if (mediaLink['type'] == 'audio'):
+                    # self.bot.send_audio(chat_id = self.channelName, audio = mediaLink['content'], title = "test name", performer = 'test artist')
+                    # self.bot.send_audio(chat_id = self.channelName,
+                    #                     audio = requests.get(mediaLink['content']).content,
+                    #                     title = mediaLink['title'],
+                    #                     performer = mediaLink['artist'])
+                    music_group.append(mediaLink)
+                    
+            if (len(media_group) > 0):
+                if (len(post['text']) <= 1024):
+                    media_group[0].caption = post['text']
+                    self.bot.send_media_group(chat_id = self.channelName, media = media_group)
+                else:
+                    self.bot.send_media_group(chat_id = self.channelName, media = media_group)
+                    self.bot.send_message(chat_id = self.channelName, text = post['text'])
             else:
                 self.bot.send_message(chat_id = self.channelName, text = post['text'])
+                
+            if (len(music_group) > 0):
+                for music in music_group:
+                    self.bot.send_audio(chat_id = self.channelName,
+                                        audio = requests.get(music['content']).content,
+                                        title = music['title'],
+                                        performer = music['artist'])

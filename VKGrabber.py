@@ -13,8 +13,17 @@ class VKGrabber:
         # [
         #     {
         #         'text': 'Some text for first post',
-        #         'photos': ['url1', 'url2' ...],
-        #         'videos': ['url1', 'url2' ...],
+        #         'mediaLinks': [
+            #                    {'type': 'photo',
+            #                     'content': <url here>},
+            #                    {'type': 'video',
+            #                     'content': <url here>},
+            #                    {'type': 'audio',
+            #                     'content': <url here>,
+            #                     'title': <title here>,
+            #                     'artist': <artist here>
+            #                           },
+            #                     ...],
         #     },
         #     ...
         # ] 
@@ -33,9 +42,22 @@ class VKGrabber:
             
             for attach in post['attachments']:
                 if (attach['type'] == 'photo'):
-                    bufMediaList.append(attach['photo']['orig_photo']['url'])
+                    bufMediaList.append({
+                        'type': 'photo', 
+                        'content': attach['photo']['orig_photo']['url']
+                        })
                 if (attach['type'] == 'video'):
-                    bufMediaList.append(f'https://vk.com/video{attach['video']['owner_id']}_{attach['video']['id']}?access_key={attach['video']['access_key']}')
+                    bufMediaList.append({
+                        'type': 'video',
+                        'content': f'https://vk.com/video{attach['video']['owner_id']}_{attach['video']['id']}?access_key={attach['video']['access_key']}'
+                        })
+                if (attach['type'] == 'audio'):
+                    bufMediaList.append({
+                        'type': 'audio', 
+                        'content': attach['audio']['url'],
+                        'title': attach['audio']['title'],
+                        'artist': attach['audio']['artist']
+                        })
            
             bufPostDate['mediaLinks'] = bufMediaList
             
