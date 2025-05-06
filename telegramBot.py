@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
 import requests
+import time
 
 class ObserverBot:
     def __init__(self, botkey, channelName):
@@ -49,3 +50,4 @@ class ObserverBot:
             if (len(doc_group) > 0):
                 for doc in doc_group:
                     self.bot.send_document(chat_id = self.channelName, document = doc['content'])
+        time.sleep(5)

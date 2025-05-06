@@ -26,12 +26,22 @@ class VKGrabber:
             #                     ...],
         #     },
         #     ...
-        # ] 
+        # ]
+        
+        wall = []
+        
+        if (count > 100):
+            lastCount = -1
+            while (len(wall) < count) and (len(wall) != lastCount):
+                print(len(wall))
+                lastCount = len(wall)
+                wall += (vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = 100, offset = len(wall))['items'])
+        else:
+            wall = vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = count)['items']
         
         postList = []
-        wall = vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = count)
         
-        for post in wall['items']:
+        for post in wall:
             bufPostDate = {
                 'text': None,
                 'mediaLinks': None,
@@ -41,7 +51,7 @@ class VKGrabber:
             bufPostDate['text'] = post['text']
             
             if('copy_history' in post.keys()):
-                break
+                continue
             
             for attach in post['attachments']:
                 if (attach['type'] == 'photo'):
