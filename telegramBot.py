@@ -30,6 +30,7 @@ class ObserverBot:
                 media_group = []
                 music_group = []
                 doc_group = []
+                poll_group = []
                 
                 if (self.generateContentHash(post['text'], post['mediaLinks']) in sent_posts):
                     print(f'Пост ({post['text'][:40]}) уже опубликован!')
@@ -47,6 +48,9 @@ class ObserverBot:
                         
                     if (mediaLink['type'] == 'audio'):
                         music_group.append(mediaLink)
+                        
+                    if (mediaLink['type'] == 'poll'):
+                        poll_group.append(mediaLink)
                         
                 if (len(media_group) > 0):
                     if (len(post['text']) <= 1024):
@@ -68,12 +72,21 @@ class ObserverBot:
                 if (len(doc_group) > 0):
                     for doc in doc_group:
                         self.bot.send_document(chat_id = self.channelName, document = doc['content'])
+                        
+                if (len(poll_group) > 0):
+                    self.bot.send_poll(
+                        chat_id = self.channelName,
+                        question = poll_group[0]['question'],
+                        options = poll_group[0]['answers'],
+                        is_anonymous = True
+                    )
                 
                 sent_posts.append(self.generateContentHash(post['text'], post['mediaLinks']))
                 time.sleep(3)
                 
             with open('sent_posts.json', 'w', encoding='utf-8') as f:
                 json.dump(sent_posts, f)
-        except:
+        except Exception as e:
+            print(f'Ошибка: {e}')
             with open('sent_posts.json', 'w', encoding='utf-8') as f:
                 json.dump(sent_posts, f)

@@ -21,8 +21,10 @@ class VKGrabber:
             #                    {'type': 'audio',
             #                     'content': <url here>,
             #                     'title': <title here>,
-            #                     'artist': <artist here>
-            #                           },
+            #                     'artist': <artist here>},
+            #                    {'type': 'poll',
+            #                     'answers': <answer list here>},
+            #                     'question': <str question here>}
             #                     ...],
         #     },
         #     ...
@@ -89,6 +91,17 @@ class VKGrabber:
                             'type': 'doc', 
                             'content': attach['doc']['url']
                             })
+                        
+                if (attach['type'] == 'poll'):
+                    bufAnswerList = []
+                    for answer in attach['poll']['answers']:
+                        bufAnswerList.append(answer['text'])
+                        
+                    bufMediaList.append({
+                        'type': 'poll', 
+                        'answers': bufAnswerList,
+                        'question': attach['poll']['question']
+                        })
            
             bufPostDate['mediaLinks'] = bufMediaList
             
