@@ -31,6 +31,7 @@ class ObserverBot:
                 music_group = []
                 doc_group = []
                 poll_group = []
+                gif_group = []
                 
                 if (self.generateContentHash(post['text'], post['mediaLinks']) in sent_posts):
                     print(f'Пост ({post['text'][:40]}) уже опубликован!')
@@ -41,7 +42,10 @@ class ObserverBot:
                         media_group.append(types.InputMediaPhoto(mediaLink['content']))
                     
                     if (mediaLink['type'] == 'gif'):
-                        media_group.append(types.InputMediaDocument(media = mediaLink['content']))
+                        if (len(media_group) == 0):
+                            media_group.append(types.InputMediaDocument(media = mediaLink['content']))
+                        else:
+                            gif_group.append(mediaLink)
                     
                     if (mediaLink['type'] == 'doc'):
                         doc_group.append(mediaLink)
@@ -61,6 +65,13 @@ class ObserverBot:
                         self.bot.send_message(chat_id = self.channelName, text = post['text'])
                 else:
                     if (post['text'] != ''): self.bot.send_message(chat_id = self.channelName, text = post['text'])
+                    
+                if (len(gif_group) > 0):
+                    bif_buf_group = []
+                    for gif in gif_group:
+                        bif_buf_group.append(types.InputMediaDocument(media = gif['content']))
+                    
+                    self.bot.send_media_group(chat_id = self.channelName, media = bif_buf_group)
                     
                 if (len(music_group) > 0):
                     for music in music_group:
@@ -82,11 +93,14 @@ class ObserverBot:
                     )
                 
                 sent_posts.append(self.generateContentHash(post['text'], post['mediaLinks']))
-                time.sleep(3)
+                time.sleep(6)
                 
             with open('sent_posts.json', 'w', encoding='utf-8') as f:
                 json.dump(sent_posts, f)
+                f.close()
+                
         except Exception as e:
             print(f'Ошибка: {e}')
             with open('sent_posts.json', 'w', encoding='utf-8') as f:
                 json.dump(sent_posts, f)
+                f.close()
