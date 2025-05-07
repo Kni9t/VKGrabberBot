@@ -6,7 +6,7 @@ class TimeController:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         
-    def sleepToNextHalfHour(self):
+    def timeNextHalfHour(self):
         try:
             now = datetime.now()
             if (now.minute == 30):
@@ -21,14 +21,20 @@ class TimeController:
                 
             sleep_seconds = int((next_time - now).total_seconds())
             
-            msg = f'Ожидаю {sleep_seconds} сек. до: {next_time}'
+            return sleep_seconds, next_time
             
-            print(msg)
-            self.logger.info(msg)
-            time.sleep(sleep_seconds)
             
         except Exception as e:
             msg = f'Ошибка при попытке выполнить ожидание до {next_time}: {e}'
             
             print(msg)
             self.logger.error(msg)
+            
+            now = datetime.now()
+            
+            next_hour = now + timedelta(hours=1)
+            next_time = next_hour.replace(minute=0, second=0, microsecond=0)
+            
+            sleep_seconds = int((next_time - now).total_seconds())
+            
+            return sleep_seconds, next_time

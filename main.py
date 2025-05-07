@@ -1,13 +1,14 @@
 import json
 import logging
 from datetime import datetime
+import time
 import sys, os
 
 from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-# v 1.2.1
+# v 1.3.0
 
 try:
     os.makedirs('logs', exist_ok=True)
@@ -55,7 +56,15 @@ while True:
         for groupID in groupList:
             telegramBot.SendPost(VKCollector.GetPostFromWall(groupID, 5), parametersDict['channelUsername'])
         
-        TC.sleepToNextHalfHour()
+        secondCount, nextTime = TC.timeNextHalfHour()
+        
+        msg = f'Ожидаю {secondCount} сек. до: {nextTime}'
+        print(msg)
+        logging.info(msg)
+        
+        telegramBot.SendMsgToAdmin(msg)
+        
+        time.sleep(secondCount)
             
     except Exception as e:
         msg = f'Ошибка во время работы бота с группой: {groupID}! \n{e}'
