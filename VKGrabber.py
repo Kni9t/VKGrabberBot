@@ -40,7 +40,6 @@ class VKGrabber:
             if (count > 100):
                 lastCount = -1
                 while (len(wall) < count) and (len(wall) != lastCount):
-                    print(len(wall))
                     lastCount = len(wall)
                     wall += (vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = 100, offset = len(wall))['items'])
             else:
