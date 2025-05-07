@@ -104,6 +104,8 @@ class ObserverBot:
         except Exception as e:
             msg = f'Ошибка загрузки данных из файла: {self.hashFileName}!\n{e}\nБудет создан новый файл hash!'
             
+            self.SendMsgToAdmin(msg)
+            
             print(msg)
             self.logger.error(msg)
         return result
