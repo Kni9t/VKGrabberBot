@@ -1,12 +1,15 @@
 import requests
 import json
 import vk
+import logging
 
 class VKGrabber:
     def __init__(self, token):
         gettingToken = token.split('&')
         self.token = gettingToken[0]
         self.token_v = gettingToken[1][2:]
+        
+        self.logger = logging.getLogger(__name__)
         
     def GetPostFromWall(self, domain, count = 1):
         # Returns data as a list of dictionaries. Where each element describes the post and contains the text and a list of all attached photos.
@@ -32,21 +35,30 @@ class VKGrabber:
         
         wall = []
         
-        if (count > 100):
-            lastCount = -1
-            while (len(wall) < count) and (len(wall) != lastCount):
-                print(len(wall))
-                lastCount = len(wall)
-                wall += (vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = 100, offset = len(wall))['items'])
-        else:
-            wall = vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = count)['items']
+        try:
+            if (count > 100):
+                lastCount = -1
+                while (len(wall) < count) and (len(wall) != lastCount):
+                    print(len(wall))
+                    lastCount = len(wall)
+                    wall += (vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = 100, offset = len(wall))['items'])
+            else:
+                wall = vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = count)['items']
+                
+            self.logger.info(f'Успешно получено {len(wall)} постов из группы: {domain}')
+        except Exception as e:
+            msg = f'При выгрузке постов со стены группы: {domain} произошла ошибка: {e}'
+                    
+            print(msg)
+            self.logger.error(msg)
+            return []
         
         postList = []
         
         for post in wall:
             bufPostDate = {
-                'text': None,
-                'mediaLinks': None,
+                'text': '',
+                'mediaLinks': [],
             }
             bufMediaList = []
             

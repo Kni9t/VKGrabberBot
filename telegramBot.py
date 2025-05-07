@@ -4,13 +4,17 @@ import requests
 import time
 import hashlib
 import json
+import logging
 
 class ObserverBot:
-    def __init__(self, botkey, channelName, hashFileName = 'sent_posts.json'):
+    def __init__(self, botkey, hashFileName = 'sent_posts.json'):
         self.bot = telebot.TeleBot(botkey)
-        self.channelName = channelName
         self.hashFileName = hashFileName
         self.backupHashFileName = 'backupHash.json'
+        
+        self.logger = logging.getLogger(__name__)
+        
+        self.logger.info(f'ObserverBot успешно создан!')
         
     def generateContentHash(self, caption, url = ''):
         data = (caption or '') + str(url)
@@ -34,25 +38,42 @@ class ObserverBot:
         
         return resultTextList
     
-    def SendStr(self, str):
-        bufStr = self.resizeText(str)
+    def SendStr(self, str, channelName):
+        try:
+            bufStr = self.resizeText(str)
         
-        for message in bufStr:
-            self.bot.send_message(chat_id = self.channelName, text = message)
+            for message in bufStr:
+                self.bot.send_message(chat_id = channelName, text = message)
+                
+            self.logger.debug(f'Сообщение {message[:20].replace('\n', '')} в канал: {channelName}')
+        except Exception as e:
+            msg = f'В SendStr произошла ошибка отправления сообщения: {message[:20].replace('\n', '')} в канал: {channelName} - {e}'
+            print(msg)
+            self.logger.error(msg)
             
     def SaveHash(self, hash):
         try:
             with open(self.hashFileName, 'w', encoding='utf-8') as file:
                 json.dump(hash, file)
                 file.close()
+                
+                self.logger.debug(f'Hash {hash} успешно сохранен в файл {self.hashFileName}!')
         except Exception as e:
-            print(f'Ошибка сохранения данных в файл: {self.hashFileName}!\n{e}\nПопытка сохранить данные в резервный файл {self.backupHashFileName}...')
+            msg = f'Ошибка сохранения hash:{hash} в файл: {self.hashFileName}!\n{e}\nПопытка сохранить данные в резервный файл {self.backupHashFileName}...'
+            print(msg)
+            self.logger.error(msg)
+            
             try:
                 with open(self.backupHashFileName, 'w', encoding='utf-8') as file:
                     json.dump(hash, file)
                     file.close()
+                    
+                    self.logger.debug(f'Hash:{hash} успешно сохранен в резервный файл {self.backupHashFileName}!')
             except Exception as ex:
-                print(f'Ошибка сохранения данных в резервный файл {self.backupHashFileName}! Данные для Hash файла потеряны!\n{ex}')
+                msg = f'Ошибка сохранения hash:{hash} в резервный файл {self.backupHashFileName}! Данные для Hash файла потеряны!\n{ex}'
+                
+                print(msg)
+                self.logger.error(msg)
     
     def LoadHash(self):
         result = []
@@ -60,18 +81,30 @@ class ObserverBot:
             with open(self.hashFileName, 'r') as file:
                 result = list(json.load(file))
                 file.close()
+                
+                self.logger.debug(f'Hash файл {self.hashFileName} успешно загружен!')
         except Exception as e:
-            print(f'Ошибка загрузки данных из файла: {self.hashFileName}!\n{e}\nБудет создан новый файл hash!')
+            msg = f'Ошибка загрузки данных из файла: {self.hashFileName}!\n{e}\nБудет создан новый файл hash!'
+            
+            print(msg)
+            self.logger.error(msg)
         return result
         
-    def SendPost(self, posts):
+    def SendPost(self, posts, channelName):
         if (type(posts) is list):
             posts = reversed(posts)
             
         sent_posts = self.LoadHash()
         
-        try:
-            for post in posts:
+        if (len(posts) == 0):
+            msg = f'Не найдено постов для отправки!'
+                    
+            print(msg)
+            self.logger.info(msg)
+        
+        
+        for post in posts:
+            try:
                 media_group = []
                 music_group = []
                 doc_group = []
@@ -79,7 +112,10 @@ class ObserverBot:
                 gif_group = []
                 
                 if (self.generateContentHash(post['text'], post['mediaLinks']) in sent_posts):
-                    print(f'Пост ({post['text'][:40]}) уже опубликован!')
+                    msg = f'Пост ({post['text'][:30].replace('\n', '')}) уже опубликован!'
+                    
+                    print(msg)
+                    self.logger.info(msg)
                     continue
                 
                 for mediaLink in post['mediaLinks']:
@@ -104,34 +140,34 @@ class ObserverBot:
                 if (len(media_group) > 0):
                     if (len(post['text']) <= 1024):
                         media_group[0].caption = post['text']
-                        self.bot.send_media_group(chat_id = self.channelName, media = media_group)
+                        self.bot.send_media_group(chat_id = channelName, media = media_group)
                     else:
-                        self.bot.send_media_group(chat_id = self.channelName, media = media_group)
-                        if (post['text'] != ''): self.SendStr(post['text'])
+                        self.bot.send_media_group(chat_id = channelName, media = media_group)
+                        if (post['text'] != ''): self.SendStr(post['text'], channelName)
                 else:
-                    if (post['text'] != ''): self.SendStr(post['text'])
+                    if (post['text'] != ''): self.SendStr(post['text'], channelName)
                     
                 if (len(gif_group) > 0):
                     bif_buf_group = []
                     for gif in gif_group:
                         bif_buf_group.append(types.InputMediaDocument(media = gif['content']))
                     
-                    self.bot.send_media_group(chat_id = self.channelName, media = bif_buf_group)
+                    self.bot.send_media_group(chat_id = channelName, media = bif_buf_group)
                     
                 if (len(music_group) > 0):
                     for music in music_group:
-                        self.bot.send_audio(chat_id = self.channelName,
+                        self.bot.send_audio(chat_id = channelName,
                                             audio = requests.get(music['content']).content,
                                             title = music['title'],
                                             performer = music['artist'])
                         
                 if (len(doc_group) > 0):
                     for doc in doc_group:
-                        self.bot.send_document(chat_id = self.channelName, document = doc['content'])
+                        self.bot.send_document(chat_id = channelName, document = doc['content'])
                         
                 if (len(poll_group) > 0):
                     self.bot.send_poll(
-                        chat_id = self.channelName,
+                        chat_id = channelName,
                         question = poll_group[0]['question'],
                         options = poll_group[0]['answers'],
                         is_anonymous = True
@@ -140,8 +176,12 @@ class ObserverBot:
                 sent_posts.append(self.generateContentHash(post['text'], post['mediaLinks']))
                 time.sleep(6)
                 
-            self.SaveHash(sent_posts)
+                self.SaveHash(sent_posts)
                 
-        except Exception as e:
-            print(f'Ошибка: {e}')
-            self.SaveHash(sent_posts)
+            except Exception as e:
+                msg = f'При отправке поста произошла ошибка: {e}'
+                        
+                print(msg)
+                self.logger.error(msg)
+                
+                self.SaveHash(sent_posts)
