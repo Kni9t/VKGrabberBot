@@ -4,6 +4,9 @@
 This is a simple telegram bot that is used to transfer posts from the VK social network. The bot was written purely for my own needs, but I thought it might be useful to someone.
 
 Briefly, this bot goes through the list of specified groups and copies the 5 latest publications from each of them to the specified channel in the telegram. The bot does this strictly every 30 minutes. Explanations, every time the time is a multiple of 30 minutes, the bot will start copying. For example, the bot will copy posts at 10:00, then at 10:30, then at 11:00, and so on throughout the day.
+
+When transferring posts, the bot creates a special hash by which it understands which post has been moved and which has not yet been moved, so that the bot will not duplicate posts. However, if you edit a post in VK, the bot will transfer it as a new one, since it has no way to change the post in the telegram channel.
+
 # Preparing for start
 In order to use this bot, you need to follow several steps:
 1) You need to create a bot in telegram. You can use this guide [here](https://core.telegram.org/bots/features#creating-a-new-bot). During the creation process, you will receive a bot token, do not lose it!
