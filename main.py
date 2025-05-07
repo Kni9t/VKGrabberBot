@@ -7,7 +7,7 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-# v 1.0.0
+# v 1.1.0
 
 try:
     os.makedirs('logs', exist_ok=True)
@@ -25,7 +25,7 @@ except Exception as e:
 
 try:
     with open('params/parameters.json') as file:
-        parametersDict = json.load(file)
+        parametersDict = dict(json.load(file))
         file.close()
     
     with open(parametersDict['groupListFileName']) as file:
@@ -33,7 +33,12 @@ try:
         file.close()
     
     VKCollector = VKGrabber(parametersDict['VKToken'])
-    telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'])
+    
+    if ('adminID' in parametersDict.keys()):
+        telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'], parametersDict['adminID'])
+    else:
+        telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'])
+        
     TC = TimeController()
 
 except Exception as e:
@@ -53,7 +58,9 @@ while True:
         TC.sleepToNextHalfHour()
             
     except Exception as e:
-        msg = f'Ошибка при попытке проверки постов в {groupID}! {e}'
+        msg = f'Ошибка во время работы бота с группой: {groupID}! \n{e}'
+        
+        telegramBot.SendMsgToAdmin(msg)
     
         print(msg)
         logging.info(msg)

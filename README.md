@@ -1,4 +1,4 @@
-# VKGrabberBot v 1.0.0
+# VKGrabberBot v 1.1.0
 
 # Introduction
 This is a simple telegram bot that is used to transfer posts from the VK social network. The bot was written purely for my own needs, but I thought it might be useful to someone.
@@ -42,7 +42,7 @@ The **parameters file.json** contains all the tokens and keys used to connect to
 2) "VKToken"  - Here you need to specify your **Service app token**, obtained from **paragraph 3** of chapter **Preparing for start**. **It is important that the token is required in its full form, along with the version value at the end (for example &v=5.199)**
 3) "channelUsername"  - Here you just specify your @id_telegram_channel
 
-The **hashFileName** and **groupListFileName** parameters only indicate the path to files with a hash of already sent posts and a file with a list of VK groups. They do not need to be changed
+The **hashFileName**, **groupListFileName** and **adminID** parameters only indicate the path to files with a hash of already sent posts and a file with a list of VK groups. They do not need to be changed
 
 Example of settings **parameters file.the json** is shown below:
 ```json

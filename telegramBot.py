@@ -7,14 +7,16 @@ import json
 import logging
 
 class ObserverBot:
-    def __init__(self, botkey, hashFileName = 'sent_posts.json'):
+    def __init__(self, botkey, hashFileName = 'sent_posts.json', adminId = None):
         self.bot = telebot.TeleBot(botkey)
         self.hashFileName = hashFileName
         self.backupHashFileName = 'backupHash.json'
+        self.adminId = adminId
         
         self.logger = logging.getLogger(__name__)
         
         self.logger.info(f'ObserverBot успешно создан!')
+        self.SendMsgToAdmin('Бот для парсинга постов из VK бул успешно инициирован! Вы были указаны как администратор. В случае критических ошибок бота, Вам будет направлено уведомление!')
         
     def generateContentHash(self, caption, url = ''):
         data = (caption or '') + str(url)
@@ -45,21 +47,35 @@ class ObserverBot:
             for message in bufStr:
                 self.bot.send_message(chat_id = channelName, text = message)
                 
-            self.logger.debug(f'Сообщение {message[:20].replace('\n', '')} в канал: {channelName}')
+            self.logger.debug(f'Сообщение ({message[:20].replace('\n', '')}) в канал: {channelName}')
         except Exception as e:
-            msg = f'В SendStr произошла ошибка отправления сообщения: {message[:20].replace('\n', '')} в канал: {channelName} - {e}'
+            msg = f'В SendStr произошла ошибка отправления сообщения: ({message[:20].replace('\n', '')}) в канал: {channelName} - {e}'
             print(msg)
             self.logger.error(msg)
-            
-    def SaveHash(self, hash):
+    
+    def SendMsgToAdmin(self, str):
+        if (self.adminId is not None):
+            try:
+                self.bot.send_message(chat_id = self.adminId, text = str)
+                    
+                self.logger.debug(f'Сообщение ({str}) отправлено администратору {self.adminId}')
+            except Exception as e:
+                msg = f'Ошибка оповещения администратора: {self.adminId}! - {e}'
+                print(msg)
+                self.logger.error(msg)
+         
+    def SaveHashs(self, hash):
         try:
             with open(self.hashFileName, 'w', encoding='utf-8') as file:
                 json.dump(hash, file)
                 file.close()
                 
-                self.logger.debug(f'Hash {hash} успешно сохранен в файл {self.hashFileName}!')
+                self.logger.debug(f'Hash успешно сохранены в файл {self.hashFileName}!')
         except Exception as e:
-            msg = f'Ошибка сохранения hash:{hash} в файл: {self.hashFileName}!\n{e}\nПопытка сохранить данные в резервный файл {self.backupHashFileName}...'
+            msg = f'Ошибка сохранения hash в файл: {self.hashFileName}!\n{e}\nПопытка сохранить данные в резервный файл {self.backupHashFileName}...'
+            
+            self.SendMsgToAdmin(msg)
+            
             print(msg)
             self.logger.error(msg)
             
@@ -68,9 +84,11 @@ class ObserverBot:
                     json.dump(hash, file)
                     file.close()
                     
-                    self.logger.debug(f'Hash:{hash} успешно сохранен в резервный файл {self.backupHashFileName}!')
+                    self.logger.debug(f'Hash успешно сохранены в резервный файл {self.backupHashFileName}!')
             except Exception as ex:
-                msg = f'Ошибка сохранения hash:{hash} в резервный файл {self.backupHashFileName}! Данные для Hash файла потеряны!\n{ex}'
+                msg = f'Ошибка сохранения hash в резервный файл {self.backupHashFileName}! Данные для Hash файла потеряны!\n{ex}'
+                
+                self.SendMsgToAdmin(msg)
                 
                 print(msg)
                 self.logger.error(msg)
@@ -111,7 +129,7 @@ class ObserverBot:
                 gif_group = []
                 
                 if (self.generateContentHash(post['text'], post['mediaLinks']) in sent_posts):
-                    msg = f'Пост ({post['text'][:30].replace('\n', '')}) из {post['groupName']} уже опубликован!'
+                    msg = f'Пост ({self.generateContentHash(post['text'], post['mediaLinks'])}) из {post['groupName']} уже опубликован!'
                     
                     print(msg)
                     self.logger.info(msg)
@@ -173,9 +191,9 @@ class ObserverBot:
                     )
                 
                 sent_posts.append(self.generateContentHash(post['text'], post['mediaLinks']))
-                self.SaveHash(sent_posts)
+                self.SaveHashs(sent_posts)
                 
-                msg = f'Пост ({post['text'][:30].replace('\n', '')}) из {post['groupName']} успешно опубликован!'
+                msg = f'Пост ({self.generateContentHash(post['text'], post['mediaLinks'])}) из {post['groupName']} успешно опубликован!'
                     
                 print(msg)
                 self.logger.info(msg)
@@ -184,8 +202,10 @@ class ObserverBot:
                 
             except Exception as e:
                 msg = f'При отправке поста произошла ошибка: {e}'
+                
+                self.SendMsgToAdmin(msg)
                         
                 print(msg)
                 self.logger.error(msg)
                 
-                self.SaveHash(sent_posts)
+                self.SaveHashs(sent_posts)
