@@ -31,7 +31,6 @@ The **group_list file.json** contains a list of strings, each of which is the ID
 [
     "VK_group_ID1",
     "VK_group_ID2",
-    ...,
 ]
 ```
 
