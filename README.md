@@ -29,9 +29,9 @@ Let's move on to configuring the files with the parameters. This project uses tw
 The **group_list file.json** contains a list of strings, each of which is the ID of the VK group from which posts should be taken. An example of filling in the file is given below:
 ```json
 [
-    "VK_group_ID1",
-    "VK_group_ID2",
-    ...,
+    "VK_group_ID1",
+    "VK_group_ID2",
+    ...,
 ]
 ```
 
@@ -45,11 +45,11 @@ The **hashFileName** and **groupListFileName** parameters only indicate the path
 Example of settings **parameters file.the json** is shown below:
 ```json
 {
-    "botKey": "00000000:ADADAADGGEVEEVEVEVEEV",
-    "VKToken": "we8er58bn5feb5wv2wdc8qdq9w9sdqdqd95q9w59g29bt9j9y9r&v=5.199",
-    "channelUsername": "@someTelegramChannelID",
-    "hashFileName": "params/sent_posts.json",
-    "groupListFileName": "params/group_list.json"
+    "botKey": "00000000:ADADAADGGEVEEVEVEVEEV",
+    "VKToken": "we8er58bn5feb5wv2wdc8qdq9w9sdqdqd95q9w59g29bt9j9y9r&v=5.199",
+    "channelUsername": "@someTelegramChannelID",
+    "hashFileName": "params/sent_posts.json",
+    "groupListFileName": "params/group_list.json"
 }
 ```
 
