@@ -7,7 +7,7 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-# v 1.1.0
+# v 1.2.1
 
 try:
     os.makedirs('logs', exist_ok=True)

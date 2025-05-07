@@ -9,27 +9,26 @@ class TimeController:
     def sleepToNextHalfHour(self):
         try:
             now = datetime.now()
-    
-            if (now.minute < 30):
-                minute = 0 
+            if (now.minute == 30):
+                next_hour = now + timedelta(hours=1)
+                next_time = next_hour.replace(minute=0, second=0, microsecond=0)
             else:
-                minute = 30
-            
-            next_run = now.replace(minute = minute, second=0, microsecond=0)
-            
-            if now >= next_run:
-                next_run += timedelta(minutes = 30)
+                if now.minute < 30:
+                    next_time = now.replace(minute=30, second=0, microsecond=0)
+                else:
+                    next_hour = now + timedelta(hours=1)
+                    next_time = next_hour.replace(minute=0, second=0, microsecond=0)
                 
-            sleep_seconds = int((next_run - now).total_seconds())
+            sleep_seconds = int((next_time - now).total_seconds())
             
-            msg = f'Ожидаю {sleep_seconds} сек. до: {next_run}'
+            msg = f'Ожидаю {sleep_seconds} сек. до: {next_time}'
             
             print(msg)
             self.logger.info(msg)
             time.sleep(sleep_seconds)
             
         except Exception as e:
-            msg = f'Ошибка при попытке выполнить ожидание до {next_run}: {e}'
+            msg = f'Ошибка при попытке выполнить ожидание до {next_time}: {e}'
             
             print(msg)
             self.logger.error(msg)

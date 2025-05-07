@@ -1,4 +1,5 @@
 import requests
+import time
 import json
 import vk
 import logging
@@ -42,6 +43,7 @@ class VKGrabber:
                 while (len(wall) < count) and (len(wall) != lastCount):
                     lastCount = len(wall)
                     wall += (vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = 100, offset = len(wall))['items'])
+                    time.sleep(6)
             else:
                 wall = vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = count)['items']
                 
