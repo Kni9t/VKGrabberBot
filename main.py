@@ -7,6 +7,8 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
+# v 1.0.0
+
 try:
     os.makedirs('logs', exist_ok=True)
     
@@ -18,6 +20,7 @@ try:
     )
 except Exception as e:
     print(f'Ошибка при создании логгера! {e}')
+    
     sys.exit(1)
 
 try:
@@ -28,20 +31,29 @@ try:
     with open(parametersDict['groupListFileName']) as file:
         groupList = list(json.load(file))
         file.close()
+    
+    VKCollector = VKGrabber(parametersDict['VKToken'])
+    telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'])
+    TC = TimeController()
+
 except Exception as e:
-    msg = f'Ошибка при чтении файла с параметрами! {e}'
+    msg = f'Ошибка при инициализации бота! {e}'
+    
     print(msg)
     logging.info(msg)
+    
     sys.exit(1)
-
-VKCollector = VKGrabber(parametersDict['VKToken'])
-telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'])
-TC = TimeController()
-
-
-try:
-    pass
-    for groupID in groupList:
-        telegramBot.SendPost(VKCollector.GetPostFromWall(groupID, 5), parametersDict['channelUsername'])
-except Exception as e:
-    print(f'Ошибка: {e}')
+    
+while True:
+    try:
+        groupID = None
+        for groupID in groupList:
+            telegramBot.SendPost(VKCollector.GetPostFromWall(groupID, 5), parametersDict['channelUsername'])
+        
+        TC.sleepToNextHalfHour()
+            
+    except Exception as e:
+        msg = f'Ошибка при попытке проверки постов в {groupID}! {e}'
+    
+        print(msg)
+        logging.info(msg)
