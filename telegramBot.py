@@ -111,7 +111,7 @@ class ObserverBot:
                 gif_group = []
                 
                 if (self.generateContentHash(post['text'], post['mediaLinks']) in sent_posts):
-                    msg = f'Пост ({post['text'][:30].replace('\n', '')}) уже опубликован!'
+                    msg = f'Пост ({post['text'][:30].replace('\n', '')}) из {post['groupName']} уже опубликован!'
                     
                     print(msg)
                     self.logger.info(msg)
@@ -175,7 +175,7 @@ class ObserverBot:
                 sent_posts.append(self.generateContentHash(post['text'], post['mediaLinks']))
                 self.SaveHash(sent_posts)
                 
-                msg = f'Пост ({post['text'][:30].replace('\n', '')}) успешно опубликован!'
+                msg = f'Пост ({post['text'][:30].replace('\n', '')}) из {post['groupName']} успешно опубликован!'
                     
                 print(msg)
                 self.logger.info(msg)

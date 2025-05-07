@@ -15,6 +15,7 @@ class VKGrabber:
         # Returns data as a list of dictionaries. Where each element describes the post and contains the text and a list of all attached photos.
         # [
         #     {
+        #         'groupName': <group id>,
         #         'text': 'Some text for first post',
         #         'mediaLinks': [
             #                    {'type': 'photo',
@@ -57,6 +58,7 @@ class VKGrabber:
         
         for post in wall:
             bufPostDate = {
+                'groupName': domain,
                 'text': '',
                 'mediaLinks': [],
             }
