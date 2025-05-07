@@ -1,4 +1,5 @@
 import logging
+import time
 from datetime import datetime, timedelta
 
 class TimeController:
@@ -6,7 +7,6 @@ class TimeController:
         self.logger = logging.getLogger(__name__)
         
     def sleepToNextHalfHour(self):
-        
         try:
             now = datetime.now()
     
@@ -22,9 +22,12 @@ class TimeController:
                 
             sleep_seconds = int((next_run - now).total_seconds())
             
-            self.logger.info(f'Ожидаю {sleep_seconds} сек. до: {next_run}')
+            msg = f'Ожидаю {sleep_seconds} сек. до: {next_run}'
             
-            #time.sleep(sleep_seconds)
+            print(msg)
+            self.logger.info(msg)
+            time.sleep(sleep_seconds)
+            
         except Exception as e:
             msg = f'Ошибка при попытке выполнить ожидание до {next_run}: {e}'
             

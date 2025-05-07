@@ -6,13 +6,14 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-groupList = ['hlorkens']
-
-with open('parameters.json') as file:
+with open('params/parameters.json') as file:
     parametersDict = json.load(file)
+    
+with open(parametersDict['groupListFileName']) as file:
+   groupList = list(json.load(file))
 
 VKCollector = VKGrabber(parametersDict['VKToken'])
-telegramBot = ObserverBot(parametersDict['botKey'])
+telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'])
 TC = TimeController()
 
 logging.basicConfig(
@@ -25,6 +26,6 @@ logging.basicConfig(
 try:
     pass
     for groupID in groupList:
-        telegramBot.SendPost(VKCollector.GetPostFromWall(groupID, 5), groupID)
+        telegramBot.SendPost(VKCollector.GetPostFromWall(groupID, 5), parametersDict['channelUsername'])
 except Exception as e:
     print(f'Ошибка: {e}')

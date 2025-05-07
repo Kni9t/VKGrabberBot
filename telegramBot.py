@@ -91,9 +91,6 @@ class ObserverBot:
         return result
         
     def SendPost(self, posts, channelName):
-        if (type(posts) is list):
-            posts = reversed(posts)
-            
         sent_posts = self.LoadHash()
         
         if (len(posts) == 0):
@@ -102,6 +99,8 @@ class ObserverBot:
             print(msg)
             self.logger.info(msg)
         
+        if (type(posts) is list):
+            posts = reversed(posts)
         
         for post in posts:
             try:
@@ -174,9 +173,14 @@ class ObserverBot:
                     )
                 
                 sent_posts.append(self.generateContentHash(post['text'], post['mediaLinks']))
-                time.sleep(6)
-                
                 self.SaveHash(sent_posts)
+                
+                msg = f'Пост ({post['text'][:30].replace('\n', '')}) успешно опубликован!'
+                    
+                print(msg)
+                self.logger.info(msg)
+                
+                time.sleep(6)
                 
             except Exception as e:
                 msg = f'При отправке поста произошла ошибка: {e}'

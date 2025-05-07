@@ -119,4 +119,6 @@ class VKGrabber:
             
             postList.append(bufPostDate)
             
+            self.logger.info(f'Пост ({post['text'][:30].replace('\n', '')}) успешно получен!')
+            
         return postList
