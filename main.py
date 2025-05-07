@@ -8,7 +8,7 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-# v 1.3.0
+# v 1.3.2
 
 try:
     os.makedirs('logs', exist_ok=True)
@@ -33,12 +33,12 @@ try:
         groupList = list(json.load(file))
         file.close()
     
-    VKCollector = VKGrabber(parametersDict['VKToken'])
-    
     if ('adminID' in parametersDict.keys()):
         telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'], parametersDict['adminID'])
     else:
         telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'])
+    
+    VKCollector = VKGrabber(parametersDict['VKToken'], telegramBot)
         
     TC = TimeController()
 

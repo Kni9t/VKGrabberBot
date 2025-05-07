@@ -16,7 +16,7 @@ class ObserverBot:
         self.logger = logging.getLogger(__name__)
         
         self.logger.info(f'ObserverBot успешно создан!')
-        self.SendMsgToAdmin('Бот для парсинга постов из VK бул успешно инициирован! Вы были указаны как администратор. В случае критических ошибок бота, Вам будет направлено уведомление!')
+        self.SendMsgToAdmin('Бот для парсинга постов из VK был успешно инициирован! Вы были указаны как администратор. В случае критических ошибок бота, Вам будет направлено уведомление!')
         
     def generateContentHash(self, caption, url = ''):
         data = (caption or '') + str(url)

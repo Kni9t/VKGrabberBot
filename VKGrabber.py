@@ -4,12 +4,15 @@ import json
 import vk
 import logging
 
+from telegramBot import ObserverBot
+
 class VKGrabber:
-    def __init__(self, token):
+    def __init__(self, token, telebot: ObserverBot):
         gettingToken = token.split('&')
         self.token = gettingToken[0]
         self.token_v = gettingToken[1][2:]
         
+        self.bot = telebot
         self.logger = logging.getLogger(__name__)
         
     def GetPostFromWall(self, domain, count = 1):
@@ -46,10 +49,16 @@ class VKGrabber:
                     time.sleep(6)
             else:
                 wall = vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = count)['items']
-                
-            self.logger.info(f'Успешно получено {len(wall)} постов из группы: {domain}')
+            
+            msg = f'Успешно получено {len(wall)} постов из группы: {domain}'
+            
+            self.logger.info(msg)
+            self.bot.SendMsgToAdmin(msg)
+            
         except Exception as e:
             msg = f'При выгрузке постов со стены группы: {domain} произошла ошибка: {e}'
+            
+            self.bot.SendMsgToAdmin(msg)
                     
             print(msg)
             self.logger.error(msg)
