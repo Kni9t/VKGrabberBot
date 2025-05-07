@@ -1,0 +1,4 @@
+py_vkontakte==5.76.0
+pyTelegramBotAPI==4.27.0
+Requests==2.32.3
+vk==3.0

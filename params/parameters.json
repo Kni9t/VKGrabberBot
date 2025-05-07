@@ -1,0 +1,7 @@
+{
+    "botKey": "telegram bot key from step 1",
+    "VKToken": "VK token from step 3",
+    "channelUsername": "username your telegram channel",
+    "hashFileName": "params/sent_posts.json",
+    "groupListFileName": "params/group_list.json"
+}
