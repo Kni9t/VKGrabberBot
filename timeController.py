@@ -15,7 +15,7 @@ class TimeController:
             else:
                 next_time = now.replace(minute = 30, second = 0, microsecond = 0)
                 
-            sleep_seconds = int((next_time - now).total_seconds())
+            sleep_seconds = int((next_time - now).total_seconds()) + 5
             
             return sleep_seconds, next_time
             
@@ -31,6 +31,6 @@ class TimeController:
             next_hour = now + timedelta(hours = 1)
             next_time = next_hour.replace(minute = 0, second = 0, microsecond = 0)
             
-            sleep_seconds = int((next_time - now).total_seconds())
+            sleep_seconds = int((next_time - now).total_seconds()) + 5
             
             return sleep_seconds, next_time
