@@ -9,15 +9,11 @@ class TimeController:
     def timeNextHalfHour(self):
         try:
             now = datetime.now()
-            if (now.minute == 30):
-                next_hour = now + timedelta(hours=1)
-                next_time = next_hour.replace(minute=0, second=0, microsecond=0)
+            if now.minute >= 30:
+                next_hour = now + timedelta(hours = 1)
+                next_time = next_hour.replace(minute = 0, second = 0, microsecond = 0)
             else:
-                if now.minute < 30:
-                    next_time = now.replace(minute=30, second=0, microsecond=0)
-                else:
-                    next_hour = now + timedelta(hours=1)
-                    next_time = next_hour.replace(minute=0, second=0, microsecond=0)
+                next_time = now.replace(minute = 30, second = 0, microsecond = 0)
                 
             sleep_seconds = int((next_time - now).total_seconds())
             
@@ -32,8 +28,8 @@ class TimeController:
             
             now = datetime.now()
             
-            next_hour = now + timedelta(hours=1)
-            next_time = next_hour.replace(minute=0, second=0, microsecond=0)
+            next_hour = now + timedelta(hours = 1)
+            next_time = next_hour.replace(minute = 0, second = 0, microsecond = 0)
             
             sleep_seconds = int((next_time - now).total_seconds())
             

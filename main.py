@@ -8,7 +8,7 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-# v 1.3.2
+# v 1.4.0
 
 try:
     os.makedirs('logs', exist_ok=True)
@@ -53,6 +53,7 @@ except Exception as e:
 while True:
     try:
         groupID = None
+        
         for groupID in groupList:
             telegramBot.SendPost(VKCollector.GetPostFromWall(groupID, 5), parametersDict['channelUsername'])
         
