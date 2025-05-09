@@ -8,7 +8,7 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-# v 1.4.0
+# v 1.4.1
 
 try:
     os.makedirs('logs', exist_ok=True)
@@ -62,8 +62,6 @@ while True:
         msg = f'Ожидаю {secondCount} сек. до: {nextTime}'
         print(msg)
         logging.info(msg)
-        
-        telegramBot.SendMsgToAdmin(msg)
         
         time.sleep(secondCount)
             
