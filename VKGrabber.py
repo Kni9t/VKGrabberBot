@@ -53,7 +53,6 @@ class VKGrabber:
             msg = f'Успешно получено {len(wall)} постов из группы: {domain}'
             
             self.logger.info(msg)
-            self.bot.SendMsgToAdmin(msg)
             
         except Exception as e:
             msg = f'При выгрузке постов со стены группы: {domain} произошла ошибка: {e}'
