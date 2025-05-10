@@ -20,7 +20,10 @@ class ObserverBot:
         
     def generateContentHash(self, caption, url = ''):
         data = (caption or '') + str(url)
-        return hashlib.md5(data.encode()).hexdigest()
+        generHash = hashlib.md5(data.encode()).hexdigest()
+        
+        self.logger.debug(f'Для генерации хэша используется текст: {caption[:20].replace('\n', '') or ''} и ссылки: {url}\nПолученный хэш: {generHash}')
+        return generHash
     
     def resizeText(self, text):
         resultTextList = []
@@ -64,18 +67,31 @@ class ObserverBot:
                 print(msg)
                 self.logger.error(msg)
          
-    def SaveHashs(self, hash):
+    def LoadData(self):
+        uploadedData = {}
         try:
-            with open(self.hashFileName, 'w', encoding='utf-8') as file:
-                json.dump(hash, file)
+            with open(self.hashFileName) as file:
+                uploadedData = dict(json.load(file))
                 file.close()
                 
-                self.logger.debug(f'Hash успешно сохранены в файл {self.hashFileName}!')
         except Exception as e:
-            msg = f'Ошибка сохранения hash в файл: {self.hashFileName}!\n{e}\nПопытка сохранить данные в резервный файл {self.backupHashFileName}...'
-            
+            msg = f'Ошибка загрузки данных из файла: {self.hashFileName}!\n{e}\nБудет создан новый файл!'
             self.SendMsgToAdmin(msg)
-            
+            print(msg)
+            self.logger.error(msg)
+        
+        return uploadedData
+    
+    def SaveData(self, data):
+        try:
+            with open(self.hashFileName, 'w', encoding='utf-8') as file:
+                json.dump(data, file)
+                file.close()
+                self.logger.debug(f'Данные о последних постах успешно сохранены в файл {self.hashFileName}!')
+                
+        except Exception as e:
+            msg = f'Ошибка сохранения данных о последних постах в файл: {self.hashFileName}!\n{e}\nПопытка сохранить данные в резервный файл {self.backupHashFileName}...'
+            self.SendMsgToAdmin(msg)
             print(msg)
             self.logger.error(msg)
             
@@ -83,35 +99,16 @@ class ObserverBot:
                 with open(self.backupHashFileName, 'w', encoding='utf-8') as file:
                     json.dump(hash, file)
                     file.close()
+                    self.logger.debug(f'Данных о последних постах успешно сохранены в резервный файл {self.backupHashFileName}!')
                     
-                    self.logger.debug(f'Hash успешно сохранены в резервный файл {self.backupHashFileName}!')
             except Exception as ex:
-                msg = f'Ошибка сохранения hash в резервный файл {self.backupHashFileName}! Данные для Hash файла потеряны!\n{ex}'
-                
+                msg = f'Ошибка сохранения данных о последних постах в резервный файл {self.backupHashFileName}! Данные потеряны!\n{ex}'
                 self.SendMsgToAdmin(msg)
-                
                 print(msg)
                 self.logger.error(msg)
     
-    def LoadHash(self):
-        result = []
-        try:
-            with open(self.hashFileName, 'r') as file:
-                result = list(json.load(file))
-                file.close()
-                
-                self.logger.debug(f'Hash файл {self.hashFileName} успешно загружен!')
-        except Exception as e:
-            msg = f'Ошибка загрузки данных из файла: {self.hashFileName}!\n{e}\nБудет создан новый файл hash!'
-            
-            self.SendMsgToAdmin(msg)
-            
-            print(msg)
-            self.logger.error(msg)
-        return result
-        
     def SendPost(self, posts, channelName):
-        sent_posts = self.LoadHash()
+        lastPosts = self.LoadData()
         
         if (len(posts) == 0):
             msg = f'Не найдено постов для отправки!'
@@ -130,12 +127,15 @@ class ObserverBot:
                 poll_group = []
                 gif_group = []
                 
-                if (self.generateContentHash(post['text'], post['mediaLinks']) in sent_posts):
-                    msg = f'Пост ({self.generateContentHash(post['text'], post['mediaLinks'])}) из {post['groupName']} уже опубликован!'
-                    
-                    print(msg)
-                    self.logger.info(msg)
-                    continue
+                if (post['groupName'] not in lastPosts.keys()):
+                    lastPosts[post['groupName']] = 9999999999999999999999999
+                else:
+                    if (lastPosts[post['groupName']] >= post['date']):
+                        msg = f'Пост ({post['date']}) из {post['groupName']} уже опубликован!'
+                        
+                        print(msg)
+                        self.logger.info(msg)
+                        continue
                 
                 for mediaLink in post['mediaLinks']:
                     if ((mediaLink['type'] == 'photo') or (mediaLink['type'] == 'video')):
@@ -192,10 +192,9 @@ class ObserverBot:
                         is_anonymous = True
                     )
                 
-                sent_posts.append(self.generateContentHash(post['text'], post['mediaLinks']))
-                self.SaveHashs(sent_posts)
-                
-                msg = f'Пост ({self.generateContentHash(post['text'], post['mediaLinks'])}) из {post['groupName']} успешно опубликован!'
+                lastPosts[post['groupName']] = post['date']
+                self.SaveData(lastPosts)                
+                msg = f'Пост ({post['date']}) из {post['groupName']} успешно опубликован!'
                     
                 print(msg)
                 self.logger.info(msg)
@@ -210,4 +209,4 @@ class ObserverBot:
                 print(msg)
                 self.logger.error(msg)
                 
-                self.SaveHashs(sent_posts)
+                self.SaveData(lastPosts)

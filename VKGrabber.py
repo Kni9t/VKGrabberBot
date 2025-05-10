@@ -20,6 +20,7 @@ class VKGrabber:
         # [
         #     {
         #         'groupName': <group id>,
+        #         'date': <date>,
         #         'text': 'Some text for first post',
         #         'mediaLinks': [
             #                    {'type': 'photo',
@@ -68,6 +69,7 @@ class VKGrabber:
         for post in wall:
             bufPostDate = {
                 'groupName': domain,
+                'date': post['date'],
                 'text': '',
                 'mediaLinks': [],
             }

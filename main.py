@@ -8,14 +8,12 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-# v 1.4.2
-
 try:
     os.makedirs('logs', exist_ok=True)
     
     logging.basicConfig(
     filename = f'logs/Running_logs-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log',
-    level = logging.INFO,
+    level = logging.DEBUG,
     format = '%(asctime)s [%(name)s] %(levelname)s: %(message)s',
     encoding='utf-8'
     )
@@ -55,7 +53,8 @@ while True:
         groupID = None
         
         for groupID in groupList:
-            telegramBot.SendPost(VKCollector.GetPostFromWall(groupID, 5), parametersDict['channelUsername'])
+            posts = VKCollector.GetPostFromWall(groupID, 5)
+            telegramBot.SendPost(posts, parametersDict['channelUsername'])
         
         secondCount, nextTime = TC.timeNextHalfHour()
         
