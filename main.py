@@ -3,12 +3,24 @@ import logging
 from datetime import datetime
 import time
 import sys, os
+import signal
 
 from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
-VERSION = '1.9.1'
+def handle_signal(signum, frame):
+    msg = f"Получен сигнал закрытия бота! - {signum} Бот завершает работу..."
+    
+    telegramBot.SendMsgToAdmin(msg)
+    logging.info(msg)
+    
+    sys.exit(0)
+    
+signal.signal(signal.SIGINT, handle_signal)   # Ctrl+C
+signal.signal(signal.SIGTERM, handle_signal)  # kill
+
+VERSION = '1.9.2'
 
 try:
     os.makedirs('logs', exist_ok=True)
