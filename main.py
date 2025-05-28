@@ -20,7 +20,7 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)   # Ctrl+C
 signal.signal(signal.SIGTERM, handle_signal)  # kill
 
-VERSION = '1.9.2'
+VERSION = '1.9.3'
 
 try:
     os.makedirs('logs', exist_ok=True)
@@ -55,6 +55,11 @@ try:
     VKCollector = VKGrabber(parametersDict['VKToken'], telegramBot)
         
     TC = TimeController()
+    
+    msg = f'Бот для парсинга постов из вк в телеграм успешно инициирован! Версия запущенного бота - {VERSION}'
+    
+    telegramBot.SendMsgToAdmin(msg)
+    logging.info(msg)
 
 except Exception as e:
     msg = f'Ошибка при инициализации бота! {e}'
