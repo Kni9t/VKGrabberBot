@@ -67,6 +67,7 @@ class VKGrabber:
         postList = []
         
         for post in wall:
+            postApproved = False
             bufPostDate = {
                 'groupName': domain,
                 'date': post['date'],
@@ -86,6 +87,7 @@ class VKGrabber:
                         'type': 'photo', 
                         'content': attach['photo']['orig_photo']['url']
                         })
+                    postApproved = True
                     
                 if (attach['type'] == 'video'):
                     if(attach['video']['type'] == 'video'):
@@ -93,6 +95,7 @@ class VKGrabber:
                             'type': 'video',
                             'content': f'https://vk.com/video{attach['video']['owner_id']}_{attach['video']['id']}?access_key={attach['video']['access_key']}'
                             })
+                        postApproved = True
                         
                     if(attach['video']['type'] == 'short_video'):
                         break
@@ -104,6 +107,7 @@ class VKGrabber:
                         'title': attach['audio']['title'],
                         'artist': attach['audio']['artist']
                         })
+                    postApproved = True
                     
                 if (attach['type'] == 'doc'):
                     if (attach['doc']['ext'] == 'gif'):
@@ -111,11 +115,13 @@ class VKGrabber:
                             'type': 'gif', 
                             'content': attach['doc']['url']
                             })
+                        postApproved = True
                     else:
                         bufMediaList.append({
                             'type': 'doc', 
                             'content': attach['doc']['url']
                             })
+                        postApproved = True
                         
                 if (attach['type'] == 'poll'):
                     bufAnswerList = []
@@ -127,11 +133,13 @@ class VKGrabber:
                         'answers': bufAnswerList,
                         'question': attach['poll']['question']
                         })
+                    postApproved = True
            
             bufPostDate['mediaLinks'] = bufMediaList
-            
-            postList.append(bufPostDate)
-            
-            self.logger.info(f'Пост ({post['text'][:30].replace('\n', '')}) успешно получен!')
+            if postApproved:
+                postList.append(bufPostDate)
+                self.logger.info(f'Пост ({post['text'][:30].replace('\n', '')}) успешно получен!')
+            else:
+                self.logger.info(f'Пост ({post['text'][:30].replace('\n', '')}) был успешно получен, но не отправлен, так как содержит необработанный контент!')
             
         return postList
