@@ -136,7 +136,8 @@ class VKGrabber:
                     postApproved = True
            
             bufPostDate['mediaLinks'] = bufMediaList
-            if postApproved:
+            
+            if (postApproved or len(post['attachments']) == 0):
                 postList.append(bufPostDate)
                 self.logger.info(f'Пост ({post['text'][:30].replace('\n', '')}) успешно получен!')
             else:
