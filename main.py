@@ -8,6 +8,8 @@ from VKGrabber import VKGrabber
 from telegramBot import ObserverBot
 from timeController import TimeController
 
+VERSION = '1.9.1'
+
 try:
     os.makedirs('logs', exist_ok=True)
     
@@ -21,6 +23,8 @@ except Exception as e:
     print(f'Ошибка при создании логгера! {e}')
     
     sys.exit(1)
+    
+logging.info(f'Версия запущенного бота - v.{VERSION}')
 
 try:
     with open('params/parameters.json') as file:
