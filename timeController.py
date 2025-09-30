@@ -1,5 +1,4 @@
 import logging
-import time
 from datetime import datetime, timedelta
 
 class TimeController:

@@ -1,4 +1,4 @@
-# VKGrabberBot v 1.9.3
+# VKGrabberBot v 1.11.0
 
 # Introduction
 This is a simple telegram bot that is used to transfer posts from the VK social network. The bot was written purely for my own needs, but I thought it might be useful to someone.
@@ -22,10 +22,8 @@ pip install -r requirements.txt
 ```
 
 Just in case, I used the following Python libraries:
-1) [py-vkontakte](https://pypi.org/project/py-vkontakte/)
-2) [pyTelegramBotAPI](https://pypi.org/project/pyTelegramBotAPI/)
-3) [requests](https://pypi.org/project/requests/)
-4) [vk](https://pypi.org/project/vk/)
+1) [pyTelegramBotAPI](https://pypi.org/project/pyTelegramBotAPI/)
+2) [requests](https://pypi.org/project/requests/)
 
 Let's move on to configuring the files with the parameters. This project uses two files with settings: **parameters.json** and **group_list.json**. They are both stored in the '**params**' directory.
 

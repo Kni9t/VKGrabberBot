@@ -20,7 +20,7 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)   # Ctrl+C
 signal.signal(signal.SIGTERM, handle_signal)  # kill
 
-VERSION = '1.9.3'
+VERSION = '1.11.0'
 
 try:
     os.makedirs('logs', exist_ok=True)
@@ -28,12 +28,13 @@ try:
     logging.basicConfig(
     filename = f'logs/Running_logs-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log',
     level = logging.DEBUG,
-    format = '%(asctime)s [%(name)s] %(levelname)s: %(message)s',
+    format = '%(name)s: %(asctime)s - %(levelname)s - %(filename)s - %(module)s - %(lineno)d - %(message)s',
     encoding='utf-8'
     )
+    
+    logging.getLogger("urllib3.connectionpool").setLevel(logging.WARNING)
 except Exception as e:
     print(f'Ошибка при создании логгера! {e}')
-    
     sys.exit(1)
     
 logging.info(f'Версия запущенного бота - v.{VERSION}')
@@ -52,7 +53,7 @@ try:
     else:
         telegramBot = ObserverBot(parametersDict['botKey'], parametersDict['hashFileName'])
     
-    VKCollector = VKGrabber(parametersDict['VKToken'], telegramBot)
+    VKCollector = VKGrabber(parametersDict['VKToken'])
         
     TC = TimeController()
     

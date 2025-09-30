@@ -1,19 +1,38 @@
 import requests
 import time
-import json
-import vk
 import logging
 
-from telegramBot import ObserverBot
-
 class VKGrabber:
-    def __init__(self, token, telebot: ObserverBot):
+    def __init__(self, token):
         gettingToken = token.split('&')
         self.token = gettingToken[0]
         self.token_v = gettingToken[1][2:]
         
-        self.bot = telebot
         self.logger = logging.getLogger(__name__)
+        
+    def _WallGet(self, domain, count = 1, offset = 0):
+        url = "https://api.vk.com/method/wall.get"
+        
+        params = {
+            "access_token": self.token,
+            "v": self.token_v,
+            "owner_id": domain,
+            "count": count,
+            "offset": offset,
+        }
+        
+        resp = requests.get(url, params=params)
+        data = resp.json()
+        
+        if "error" in data:
+            msg = f"VK API error: {data['error']}"
+            self.logger.error(msg)
+            raise Exception(msg)
+        
+        msg = f'Успешно выполнен запрос к {url}'
+        self.logger.debug(msg)
+        
+        return data["response"]
         
     def GetPostFromWall(self, domain, count = 1):
         # Returns data as a list of dictionaries. Where each element describes the post and contains the text and a list of all attached photos.
@@ -46,10 +65,10 @@ class VKGrabber:
                 lastCount = -1
                 while (len(wall) < count) and (len(wall) != lastCount):
                     lastCount = len(wall)
-                    wall += (vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = 100, offset = len(wall))['items'])
+                    wall += self._WallGet(domain, 100, len(wall))['items']
                     time.sleep(6)
             else:
-                wall = vk.API(access_token = self.token, v = self.token_v).wall.get(domain = domain, count = count)['items']
+                wall = self._WallGet(domain, count)['items']
             
             msg = f'Успешно получено {len(wall)} постов из группы: {domain}'
             
