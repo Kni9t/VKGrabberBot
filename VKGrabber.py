@@ -11,7 +11,7 @@ class VKGrabber:
         self.logger = logging.getLogger(__name__)
         
     def _WallGet(self, domain, count = 1, offset = 0):
-        url = "https://api.vk.com/method/wall.get"
+        url = "https://api.vk.ru/method/wall.get"
         
         params = {
             "access_token": self.token,
