@@ -20,7 +20,7 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)   # Ctrl+C
 signal.signal(signal.SIGTERM, handle_signal)  # kill
 
-VERSION = '1.11.0'
+VERSION = '1.13.0'
 
 try:
     os.makedirs('logs', exist_ok=True)

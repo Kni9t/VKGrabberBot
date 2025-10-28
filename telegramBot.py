@@ -1,5 +1,6 @@
 import telebot
 from telebot import types
+from io import BytesIO
 import requests
 import time
 import hashlib
@@ -139,7 +140,10 @@ class ObserverBot:
                 
                 for mediaLink in post['mediaLinks']:
                     if ((mediaLink['type'] == 'photo') or (mediaLink['type'] == 'video')):
-                        media_group.append(types.InputMediaPhoto(mediaLink['content']))
+                        response = requests.get(mediaLink['content'], headers={"User-Agent": "Mozilla/5.0"})
+                        photo = BytesIO(response.content)
+                        
+                        media_group.append(types.InputMediaPhoto(photo))
                     
                     if (mediaLink['type'] == 'gif'):
                         if (len(media_group) == 0):

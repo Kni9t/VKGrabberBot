@@ -1,4 +1,4 @@
-# VKGrabberBot v 1.12.0
+# VKGrabberBot v 1.13.0
 
 # Introduction
 This is a simple telegram bot that is used to transfer posts from the VK social network. The bot was written purely for my own needs, but I thought it might be useful to someone.
