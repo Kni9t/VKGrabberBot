@@ -7,6 +7,9 @@ import hashlib
 import json
 import logging
 
+ERROR_LIMIT = 10
+SEC_WAIT_AFTER_ERR = 4
+    
 class ObserverBot:
     def __init__(self, botkey, hashFileName = 'sent_posts.json', adminId = None):
         self.bot = telebot.TeleBot(botkey)
@@ -108,109 +111,130 @@ class ObserverBot:
                 print(msg)
                 self.logger.error(msg)
     
-    def SendPost(self, posts, channelName):
-        lastPosts = self.LoadData()
-        
+    def SendPosts(self, posts, channelName):
         if (len(posts) == 0):
             msg = f'Не найдено постов для отправки!'
                     
             print(msg)
             self.logger.info(msg)
-        
-        if (type(posts) is list):
-            posts = reversed(posts)
-        
-        for post in posts:
-            try:
-                media_group = []
-                music_group = []
-                doc_group = []
-                poll_group = []
-                gif_group = []
+        else:
+            if (type(posts) is list):
+                posts = reversed(posts)
                 
-                if (post['groupName'] not in lastPosts.keys()):
-                    lastPosts[post['groupName']] = 9999999999999999999999999
-                else:
-                    if (lastPosts[post['groupName']] >= post['date']):
-                        msg = f'Пост ({post['date']}) из {post['groupName']} уже опубликован!'
-                        
-                        print(msg)
-                        self.logger.info(msg)
-                        continue
+            for post in posts:
+                err_count = 1
                 
-                for mediaLink in post['mediaLinks']:
-                    if ((mediaLink['type'] == 'photo') or (mediaLink['type'] == 'video')):
-                        response = requests.get(mediaLink['content'], headers={"User-Agent": "Mozilla/5.0"})
-                        photo = BytesIO(response.content)
-                        
-                        media_group.append(types.InputMediaPhoto(photo))
+                while err_count <= ERROR_LIMIT:
+                    try:
+                        self.SendPost(post, channelName)
+                        break
                     
-                    if (mediaLink['type'] == 'gif'):
-                        if (len(media_group) == 0):
-                            media_group.append(types.InputMediaDocument(media = mediaLink['content']))
+                    except Exception as e:
+                        if err_count < ERROR_LIMIT:
+                            err_count += 1
+                            logging.warning(f"При отправке поста ({post['date']}) из группы {post['groupName']} возникла ошибка: {e}\nПопытка отправки №{err_count} будет выполнена через {SEC_WAIT_AFTER_ERR} секунд")
+                            print(f"При отправке поста ({post['date']}) из группы {post['groupName']} возникла ошибка: {e}\nПопытка отправки №{err_count} будет выполнена через {SEC_WAIT_AFTER_ERR} секунд")
+                            time.sleep(SEC_WAIT_AFTER_ERR)
+                            
                         else:
-                            gif_group.append(mediaLink)
+                            msg = f'Превышен лимит повторных попыток для отправки сообщения {post['date']}! Возникшая ошибка: \n{e}'
+                            
+                            print(msg)
+                            logging.error(msg)
+                            raise TimeoutError(msg)
+    
+    def SendPost(self, post, channelName):
+        lastPosts = self.LoadData()
+        
+        try:
+            media_group = []
+            music_group = []
+            doc_group = []
+            poll_group = []
+            gif_group = []
+            
+            if (post['groupName'] not in lastPosts.keys()):
+                lastPosts[post['groupName']] = 9999999999999999999999999
+            else:
+                if (lastPosts[post['groupName']] >= post['date']):
+                    msg = f'Пост ({post['date']}) из {post['groupName']} уже опубликован!'
                     
-                    if (mediaLink['type'] == 'doc'):
-                        doc_group.append(mediaLink)
-                        
-                    if (mediaLink['type'] == 'audio'):
-                        music_group.append(mediaLink)
-                        
-                    if (mediaLink['type'] == 'poll'):
-                        poll_group.append(mediaLink)
-                        
-                if (len(media_group) > 0):
-                    if (len(post['text']) <= 1024):
-                        media_group[0].caption = post['text']
-                        self.bot.send_media_group(chat_id = channelName, media = media_group)
+                    print(msg)
+                    self.logger.info(msg)
+                    return
+            
+            for mediaLink in post['mediaLinks']:
+                if ((mediaLink['type'] == 'photo') or (mediaLink['type'] == 'video')):
+                    response = requests.get(mediaLink['content'], headers={"User-Agent": "Mozilla/5.0"})
+                    photo = BytesIO(response.content)
+                    
+                    media_group.append(types.InputMediaPhoto(photo))
+                
+                if (mediaLink['type'] == 'gif'):
+                    if (len(media_group) == 0):
+                        media_group.append(types.InputMediaDocument(media = mediaLink['content']))
                     else:
-                        self.bot.send_media_group(chat_id = channelName, media = media_group)
-                        if (post['text'] != ''): self.SendStr(post['text'], channelName)
+                        gif_group.append(mediaLink)
+                
+                if (mediaLink['type'] == 'doc'):
+                    doc_group.append(mediaLink)
+                    
+                if (mediaLink['type'] == 'audio'):
+                    music_group.append(mediaLink)
+                    
+                if (mediaLink['type'] == 'poll'):
+                    poll_group.append(mediaLink)
+                    
+            if (len(media_group) > 0):
+                if (len(post['text']) <= 1024):
+                    media_group[0].caption = post['text']
+                    self.bot.send_media_group(chat_id = channelName, media = media_group)
                 else:
+                    self.bot.send_media_group(chat_id = channelName, media = media_group)
                     if (post['text'] != ''): self.SendStr(post['text'], channelName)
+            else:
+                if (post['text'] != ''): self.SendStr(post['text'], channelName)
+                
+            if (len(gif_group) > 0):
+                bif_buf_group = []
+                for gif in gif_group:
+                    bif_buf_group.append(types.InputMediaDocument(media = gif['content']))
+                
+                self.bot.send_media_group(chat_id = channelName, media = bif_buf_group)
+                
+            if (len(music_group) > 0):
+                for music in music_group:
+                    self.bot.send_audio(chat_id = channelName,
+                                        audio = requests.get(music['content']).content,
+                                        title = music['title'],
+                                        performer = music['artist'])
                     
-                if (len(gif_group) > 0):
-                    bif_buf_group = []
-                    for gif in gif_group:
-                        bif_buf_group.append(types.InputMediaDocument(media = gif['content']))
+            if (len(doc_group) > 0):
+                for doc in doc_group:
+                    self.bot.send_document(chat_id = channelName, document = doc['content'])
                     
-                    self.bot.send_media_group(chat_id = channelName, media = bif_buf_group)
-                    
-                if (len(music_group) > 0):
-                    for music in music_group:
-                        self.bot.send_audio(chat_id = channelName,
-                                            audio = requests.get(music['content']).content,
-                                            title = music['title'],
-                                            performer = music['artist'])
-                        
-                if (len(doc_group) > 0):
-                    for doc in doc_group:
-                        self.bot.send_document(chat_id = channelName, document = doc['content'])
-                        
-                if (len(poll_group) > 0):
-                    self.bot.send_poll(
-                        chat_id = channelName,
-                        question = poll_group[0]['question'],
-                        options = poll_group[0]['answers'],
-                        is_anonymous = True
-                    )
+            if (len(poll_group) > 0):
+                self.bot.send_poll(
+                    chat_id = channelName,
+                    question = poll_group[0]['question'],
+                    options = poll_group[0]['answers'],
+                    is_anonymous = True
+                )
+            
+            lastPosts[post['groupName']] = post['date']
+            self.SaveData(lastPosts)                
+            msg = f'Пост ({post['date']}) из {post['groupName']} успешно опубликован!'
                 
-                lastPosts[post['groupName']] = post['date']
-                self.SaveData(lastPosts)                
-                msg = f'Пост ({post['date']}) из {post['groupName']} успешно опубликован!'
-                    
-                print(msg)
-                self.logger.info(msg)
-                
-                time.sleep(6)
-                
-            except Exception as e:
-                msg = f'При отправке поста произошла ошибка: {e}'
-                
-                self.SendMsgToAdmin(msg)
-                        
-                print(msg)
-                self.logger.error(msg)
-                
-                self.SaveData(lastPosts)
+            print(msg)
+            self.logger.info(msg)
+            
+            time.sleep(6)
+            
+        except Exception as e:
+            msg = f'При отправке поста ({post['date']}) из {post['groupName']} произошла ошибка: {e}'
+            
+            print(msg)
+            self.logger.error(msg)
+            
+            self.SaveData(lastPosts)
+            raise

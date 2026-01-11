@@ -20,7 +20,7 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)   # Ctrl+C
 signal.signal(signal.SIGTERM, handle_signal)  # kill
 
-VERSION = '1.13.0'
+VERSION = '1.16.0'
 
 try:
     os.makedirs('logs', exist_ok=True)
@@ -69,14 +69,14 @@ except Exception as e:
     logging.info(msg)
     
     sys.exit(1)
-    
+
 while True:
     try:
         groupID = None
         
         for groupID in groupList:
             posts = VKCollector.GetPostFromWall(groupID, 5)
-            telegramBot.SendPost(posts, parametersDict['channelUsername'])
+            telegramBot.SendPosts(posts, parametersDict['channelUsername'])
         
         secondCount, nextTime = TC.timeNextHalfHour()
         
@@ -93,3 +93,4 @@ while True:
     
         print(msg)
         logging.info(msg)
+        time.sleep(30)
