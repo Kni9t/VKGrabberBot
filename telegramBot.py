@@ -8,7 +8,7 @@ import json
 import logging
 
 ERROR_LIMIT = 10
-SEC_WAIT_AFTER_ERR = 4
+SEC_WAIT_AFTER_ERR = 10
     
 class ObserverBot:
     def __init__(self, botkey, hashFileName = 'sent_posts.json', adminId = None):
@@ -228,7 +228,7 @@ class ObserverBot:
             print(msg)
             self.logger.info(msg)
             
-            time.sleep(6)
+            time.sleep(10)
             
         except Exception as e:
             msg = f'При отправке поста ({post['date']}) из {post['groupName']} произошла ошибка: {e}'
